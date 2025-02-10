@@ -1,0 +1,44 @@
+service: line-of-credit-app
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: LineOfCreditApplications
+
+functions:
+  createApplication:
+    handler: src/handlers/createApplication.handler
+    events:
+      - http:
+          path: applications
+          method: post
+  updateApplication:
+    handler: src/handlers/updateApplication.handler
+    events:
+      - http:
+          path: applications/{id}
+          method: put
+  getApplications:
+    handler: src/handlers/getApplications.handler
+    events:
+      - http:
+          path: applications
+          method: get
+
+resources:
+  Resources:
+    LineOfCreditApplications:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
